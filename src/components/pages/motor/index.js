@@ -59,36 +59,8 @@ export default function MotorComponent() {
   const [cost, setCost] = React.useState("");
   const [licence, setLicence] = React.useState("");
   const [seats, setSeats] = React.useState("");
-  const [location, setLocation] = React.useState("");   ; 
-  const [motors, setMotors] = React.useState(""); 
-    // const handleEditClick = async (motorId) => {
-    //     try {
-    //       const response = await fetch(`${BASEURL}/motors/edit/${motorId}`, {
-    //         method: "PUT",  
-    //         headers: {
-    //           "Content-Type": "application/json",
-    //         },
-    //         body: JSON.stringify({
-    //           name: name,
-    //           brand: brand,
-    //           company: company,
-    //           cost: cost,
-    //           licence: licence,
-    //           seats: seats,
-    //           location: location
-    //         }),
-    //       });
-    //       await response.json();
-    //       if (response.ok) {
-    //         setMotors(response.data);  
-    //         setOpen(false);
-    //       }
-    //     } catch (error) {
-    //       console.log("Edit motor data is wrong:", error);
-    //    
-    //     }
-    // };      
-  
+  const [location, setLocation] = React.useState("");
+  const [motors, setMotors] = React.useState("");
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -117,7 +89,7 @@ export default function MotorComponent() {
           cost: cost,
           licence: licence,
           seats: seats,
-          location: location
+          location: location,
         }),
       });
       await response.json();
@@ -128,19 +100,39 @@ export default function MotorComponent() {
       console.log("Add motor data is wrong:", error);
     }
   };
-  
-  const handleDeleteClick = async (id) =>{
+
+  const handleDeleteClick = async (id) => {
     try {
-        const response = await fetch(`${BASEURL}/motors/${id}`, {
-          method: "DELETE",  
-        });
-        if (response.ok) {
-          setMotors(motors.filter((motor) => motor.id !== id));
-        }
-      } catch (error) {
-        console.log("Error deleting motor:", error);
+      const response = await fetch(`${BASEURL}/motors/${id}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        // console.log("ok:", response.ok);
+        setMotors(motors.filter((motor) => motor.id !== id));
       }
-    };
+    } catch (error) {
+      console.log("Error deleting motor:", error);
+    }
+  };
+
+  const handleUpdate = async (id) => {
+    try {
+      const response = await fetch(`${BASEURL}/motors/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: name,
+        }),
+      });
+      if (response.ok) {
+        console.log(response.ok);
+      }
+    } catch (error) {
+      console.log("update is wrong", error);
+    }
+  };
 
   return (
     <div>
@@ -153,7 +145,7 @@ export default function MotorComponent() {
         }}
       >
         <TextField id="outlined-basic" label="Outlined" variant="outlined" />
-          {/* to Open */}
+        {/* to Open */}
         <Button
           variant="contained"
           color="success"
@@ -190,7 +182,7 @@ export default function MotorComponent() {
                 placeholder="Brand"
                 onChange={(e) => setBrand(e.target.value)}
               />
-               <Input
+              <Input
                 color="primary"
                 placeholder="Brand"
                 onChange={(e) => setCompany(e.target.value)}
@@ -221,7 +213,7 @@ export default function MotorComponent() {
               spacing={1}
               sx={{ display: "flex", justifyContent: "right" }}
             >
-              <Button variant="solid" color="success" onClick={handleClick}>
+              <Button variant="solid" color="success">
                 Add
               </Button>
               <Button
@@ -234,81 +226,6 @@ export default function MotorComponent() {
             </Stack>
           </div>
         </Snackbar>
-
-        {/* pop for update */}
-        {/* <Snackbar
-          autoHideDuration={5000}
-          variant="solid"
-          color="primary"
-          size="lg"
-          invertedColors
-          open={open}
-          onClose={() => setOpen(false)}
-          anchorOrigin={{ vertical: "top", horizontal: "center" }}
-          sx={(theme) => ({
-            background: `linear-gradient(45deg, ${theme.palette.primary[600]} 30%, ${theme.palette.primary[500]} 90%})`,
-            maxWidth: 360,
-          })}
-        >
-          <div>
-            <Typography level="title-lg" sx={{ textAlign: "center" }}>
-              Malumot Qo'shish
-            </Typography>
-            <Typography sx={{ mt: 1, mb: 2 }}>
-              <Input
-                color="primary"
-                placeholder="Name"
-                onChange={(e) => setName(e.target.value)}
-              />
-              <Input
-                color="primary"
-                placeholder="Brand"
-                onChange={(e) => setBrand(e.target.value)}
-              />
-               <Input
-                color="primary"
-                placeholder="Brand"
-                onChange={(e) => setCompany(e.target.value)}
-              />
-              <Input
-                color="primary"
-                placeholder="Cost"
-                onChange={(e) => setCost(e.target.value)}
-              />
-              <Input
-                color="primary"
-                placeholder="Licence"
-                onChange={(e) => setLicence(e.target.value)}
-              />
-              <Input
-                color="primary"
-                placeholder="Seats"
-                onChange={(e) => setSeats(e.target.value)}
-              />
-              <Input
-                color="primary"
-                placeholder="Location"
-                onChange={(e) => setLocation(e.target.value)}
-              />
-            </Typography>
-            <Stack
-              direction="row"
-              spacing={1}
-              sx={{ display: "flex", justifyContent: "right" }}
-            >
-              <Button variant="solid" color="success" onClick={handleClick}>
-                Update
-              </Button>
-              <Button
-                variant="outlined"
-                color="error"
-                onClick={() => setOpen(false)}
-              >
-                Cancel
-              </Button>
-            </Stack>
-          </div>
-        </Snackbar> */}
       </div>
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 700 }} aria-label="customized table">
@@ -339,7 +256,10 @@ export default function MotorComponent() {
                     variant="outlined"
                     color="error"
                     startIcon={<DeleteIcon />}
-                    onClick={handleDeleteClick}
+                    // onClick={handleDeleteClick}
+                    onClick={() => {
+                      handleDeleteClick(data._id);
+                    }}
                   >
                     Delete
                   </Button>
@@ -347,6 +267,10 @@ export default function MotorComponent() {
                     variant="outlined"
                     startIcon={<EditIcon />}
                     style={{ marginLeft: 10 }}
+                    onClick={() => {
+                      setOpen(true);
+                      handleUpdate(data._id);
+                    }}
                   >
                     Edit
                   </Button>
