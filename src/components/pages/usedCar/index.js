@@ -37,7 +37,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 const BASEURL = "http://localhost:5050/api/v1";
 
-export default function MotorComponent() {
+export default function UsedCarComponent() {
   const [allData, setAllData] = React.useState([]);
   const [open, setOpen] = React.useState(false);
   const [openEdit, setOpenEdit] = React.useState(false);
@@ -48,16 +48,16 @@ export default function MotorComponent() {
   const [licence, setLicence] = React.useState("");
   const [seats, setSeats] = React.useState("");
   const [location, setLocation] = React.useState("");;
-  const [motors, setMotors] = React.useState("");
+  const [usedCars, setUsedCars] = React.useState("");
 
   React.useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`${BASEURL}/motors/allMotors`);
-        const motors = await response.json();
-        setAllData(motors.data);
+        const response = await fetch(`${BASEURL}/usedCars/allUsedCars`);
+        const usedCars = await response.json();
+        setAllData(usedCars.data);
       } catch (error) {
-        console.log("Motor data is wrong:", error);
+        console.log("UsedCars data is wrong:", error);
       }
     };
     fetchData();
@@ -65,7 +65,7 @@ export default function MotorComponent() {
 
   const handleClick = async () => {
     try {
-      const response = await fetch(`${BASEURL}/motors/addNewMotor`, {
+      const response = await fetch(`${BASEURL}/usedCars/addNewUsedCar`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -85,13 +85,13 @@ export default function MotorComponent() {
         setOpen(false);
       }
     } catch (error) {
-      console.log("Add motor data is wrong:", error);
+      console.log("Add usedCars data is wrong:", error);
     }
   };
 
   const handleUpdateClick = async (id) => {
     try {
-      const response = await fetch(`${BASEURL}/motors/${id}`,{
+      const response = await fetch(`${BASEURL}/usedCars/${id}`,{
         method: "PUT",
         headers: {
           "Content-Type": "aplication/json"
@@ -116,12 +116,11 @@ export default function MotorComponent() {
 
   const handleDeleteClick = async (id) => {
     try {
-      const response = await fetch(`${BASEURL}/motors/${id}`, {
+      const response = await fetch(`${BASEURL}/usedCars/${id}`, {
         method: "DELETE",
       });
       if (response.ok) {
-        // console.log("ok:", response.ok);
-        setMotors(motors.filter((motor) => motor.id !== id));
+        setUsedCars(usedCars.filter((usedCar) => usedCar.id !== id));
       }
     } catch (error) {
       console.log("Error deleting motor:", error);

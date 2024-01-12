@@ -40,6 +40,18 @@ export default function SideBar() {
         <Link to="/motor">
           <ListItemButton>Motor</ListItemButton>
         </Link>
+        <Link to="/caravan">
+          <ListItemButton>Caravan</ListItemButton>
+        </Link>
+        <Link to="/tuning">
+          <ListItemButton>Tuning</ListItemButton>
+        </Link>
+        <Link to="/usedCar">
+          <ListItemButton>Used cars</ListItemButton>
+        </Link>
+        <Link to="/users">
+          <ListItemButton>Users</ListItemButton>
+        </Link>
       </List>
       <Divider />
     </Box>
