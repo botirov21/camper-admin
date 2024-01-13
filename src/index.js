@@ -8,28 +8,23 @@ import CaravanComponent from './components/pages/caravan';
 import TuningComponent from './components/pages/tuning';
 import UsedCarComponent from './components/pages/usedCar';
 import UsersComponent from './components/pages/users';
+import Login from './components/pages/login/login';
+import DisplaySideBar from './components/sidebar/displaySideBar';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
     <BrowserRouter>
-      <SideBar/>
+      <DisplaySideBar>
+       <SideBar/>
+      </DisplaySideBar>
       <Routes>
+        <Route path="/" element={<Login/>} />
         <Route path="/motor" element={<MotorComponent/>} />
-      </Routes>
-      <Routes>
         <Route path="/caravan" element={<CaravanComponent/>} />
-      </Routes>
-      <Routes>
         <Route path="/tuning" element={<TuningComponent/>} />
-      </Routes>
-      <Routes>
         <Route path="/usedCar" element={<UsedCarComponent/>} />
-      </Routes>
-      <Routes>
         <Route path="/users" element={<UsersComponent/>} />
       </Routes>
     </BrowserRouter> 
-  </React.StrictMode>
 );
 
