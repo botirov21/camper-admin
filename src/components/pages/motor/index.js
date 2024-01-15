@@ -14,6 +14,7 @@ import Stack from "@mui/joy/Stack";
 import Typography from "@mui/joy/Typography";
 import { Input } from "@mui/joy";
 import Snackbar from "@mui/joy/Snackbar";
+import Popup from 'reactjs-popup';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -49,13 +50,15 @@ export default function MotorComponent() {
   const [seats, setSeats] = React.useState("");
   const [location, setLocation] = React.useState("");;
   const [motors, setMotors] = React.useState("");
-
+  const [search, setSearch] = React.useState("");
+  const [filteredData, setFilteredData] = React.useState("");
   React.useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetch(`${BASEURL}/motors/allMotors`);
         const motors = await response.json();
         setAllData(motors.data);
+        setFilteredData(motors.data);
       } catch (error) {
         console.log("Motor data is wrong:", error);
       }
@@ -89,12 +92,13 @@ export default function MotorComponent() {
     }
   };
 
-  const handleUpdateClick = async (id) => {
+  const handleUpdateClick = async (_id) => {
+    // setOpenEdit(true);
     try {
-      const response = await fetch(`${BASEURL}/motors/${id}`,{
+      const response = await fetch(`${BASEURL}/motors/${_id}`, {
         method: "PUT",
         headers: {
-          "Content-Type": "aplication/json"
+          "Content-Type": "application/json", // Fix the typo here
         },
         body: JSON.stringify({
           name: name,
@@ -103,16 +107,18 @@ export default function MotorComponent() {
           cost: cost,
           licence: licence,
           seats: seats,
-          location: location
-        })
-      })
+          location: location,
+        }),
+      });
       if (response.ok) {
-        console.log(response.ok);
+        // console.log(response.ok);
+        setOpenEdit(false);
       }
     } catch (error) {
       console.log("update is wrong", error);
     }
   };
+
 
   const handleDeleteClick = async (id) => {
     try {
@@ -127,6 +133,24 @@ export default function MotorComponent() {
       console.log("Error deleting motor:", error);
     }
   }
+  const handleSearch = (query) => {
+    setSearch(query);
+    const filtered = allData.filter(
+      (data) =>
+        data.name.toLowerCase().includes(query.toLowerCase()) ||
+        data.company.toLowerCase().includes(query.toLowerCase())
+    );
+    setFilteredData(filtered);
+  };
+  // const filteredSearch = searchFilter;
+  console.log("filter", filteredData);
+
+  const formatDate = (createdAt) => {
+    const data = new Date(createdAt);
+    return data.toISOString().split("T")[0];
+  };
+
+  console.log(formatDate);
   return (
     <div>
       <div
@@ -137,7 +161,7 @@ export default function MotorComponent() {
           padding: "20px",
         }}
       >
-        <TextField id="outlined-basic" label="Outlined" variant="outlined" />
+        <TextField id="outlined-basic" label="Outlined" variant="outlined"           onChange={(e) => handleSearch(e.target.value)} />
         {/* to Open */}
         <Button
           variant="contained"
@@ -221,81 +245,6 @@ export default function MotorComponent() {
         </Snackbar>
 
         {/* pop for update */}
-        <Snackbar
-          autoHideDuration={5000}
-          variant="solid"
-          color="primary"
-          size="lg"
-          invertedColors
-          open={openEdit}
-          onClose={() => setOpenEdit(false)}
-          anchorOrigin={{ vertical: "top", horizontal: "center" }}
-          sx={(theme) => ({
-            background: `linear-gradient(45deg, ${theme.palette.primary[600]} 30%, ${theme.palette.primary[500]} 90%})`,
-            maxWidth: 360,
-          })}
-        >
-          <div>
-            <Typography level="title-lg" sx={{ textAlign: "center" }}>
-              Malumot Qo'shish
-            </Typography>
-            <Typography sx={{ mt: 1, mb: 2 }}>
-              <Input
-                color="primary"
-                placeholder="Name"
-                onChange={(e) => setName(e.target.value)}
-              />
-              <Input
-                color="primary"
-                placeholder="Brand"
-                onChange={(e) => setBrand(e.target.value)}
-              />
-               <Input
-                color="primary"
-                placeholder="Brand"
-                onChange={(e) => setCompany(e.target.value)}
-              />
-              <Input
-                color="primary"
-                placeholder="Cost"
-                onChange={(e) => setCost(e.target.value)}
-              />
-              <Input
-                color="primary"
-                placeholder="Licence"
-                onChange={(e) => setLicence(e.target.value)}
-              />
-              <Input
-                color="primary"
-                placeholder="Seats"
-                onChange={(e) => setSeats(e.target.value)}
-              />
-              <Input
-                color="primary"
-                placeholder="Location"
-                onChange={(e) => setLocation(e.target.value)}
-              />
-            </Typography>
-            <Stack
-              direction="row"
-              spacing={1}
-              sx={{ display: "flex", justifyContent: "right" }}
-            >
-              {/* error */}
-              {/* <Button variant="solid" color="success" onClick={() => {handleUpdateClick(data._id);}}> */}
-              <Button variant="solid" color="success" onClick={() => {handleUpdateClick();}}>
-                Update
-              </Button>
-              <Button
-                variant="outlined"
-                color="error"
-                onClick={() => setOpenEdit(false)}
-              >
-                Cancel
-              </Button>
-            </Stack>
-          </div>
-        </Snackbar>
       </div>
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 700 }} aria-label="customized table">
@@ -312,7 +261,8 @@ export default function MotorComponent() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {allData.map((data) => (
+          {filteredData &&
+              filteredData.map((data) => (
               <StyledTableRow key={data.name}>
                 <StyledTableCell>{data.name || "No Data"}</StyledTableCell>
                 <StyledTableCell>{data.brand || "No Data"}</StyledTableCell>
@@ -340,6 +290,100 @@ export default function MotorComponent() {
                     >
                     Edit
                   </Button>
+                  <Popup
+                      trigger={<button className="button"> Open Modal </button>}
+                      modal
+                      nested
+                    >
+                      {(close) => (
+                        <div className="modal">
+                          <button className="close" onClick={close}>
+                            &times;
+                          </button>
+                          <div className="header"> Modal Title </div>
+                          <div>
+                            <Typography
+                              level="title-lg"
+                              sx={{ textAlign: "center" }}
+                            >
+                              Malumot Qo'shish
+                            </Typography>
+                            <Typography sx={{ mt: 1, mb: 2 }}>
+                              <Input
+                                color="primary"
+                                placeholder="Name"
+                                onChange={(e) => setName(e.target.value)}
+                              />
+                              <Input
+                                color="primary"
+                                placeholder="Brand"
+                                onChange={(e) => setBrand(e.target.value)}
+                              />
+                              <Input
+                                color="primary"
+                                placeholder="Brand"
+                                onChange={(e) => setCompany(e.target.value)}
+                              />
+                              <Input
+                                color="primary"
+                                placeholder="Cost"
+                                onChange={(e) => setCost(e.target.value)}
+                              />
+                              <Input
+                                color="primary"
+                                placeholder="Licence"
+                                onChange={(e) => setLicence(e.target.value)}
+                              />
+                              <Input
+                                color="primary"
+                                placeholder="Seats"
+                                onChange={(e) => setSeats(e.target.value)}
+                              />
+                              <Input
+                                color="primary"
+                                placeholder="Location"
+                                onChange={(e) => setLocation(e.target.value)}
+                              />
+                            </Typography>
+                            <Stack
+                              direction="row"
+                              spacing={1}
+                              sx={{ display: "flex", justifyContent: "right" }}
+                            >
+                              {/* error */}
+                              {/* <Button variant="solid" color="success" onClick={() => {handleUpdateClick(data._id);}}> */}
+                              <Button
+                                variant="solid"
+                                color="success"
+                                onClick={() => {
+                                  handleUpdateClick(data._id);
+                                }}
+                              >
+                                Updaterrr
+                              </Button>
+                              <Button
+                                variant="outlined"
+                                color="error"
+                                onClick={() => setOpenEdit(false)}
+                              >
+                                Cancel
+                              </Button>
+                            </Stack>
+                          </div>
+                          <div className="actions">
+                            <button
+                              className="button"
+                              onClick={() => {
+                                console.log("modal closed ");
+                                close();
+                              }}
+                            >
+                              close modal
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                  </Popup>
                 </StyledTableCell>
               </StyledTableRow>
             ))}

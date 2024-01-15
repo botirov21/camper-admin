@@ -80,7 +80,7 @@ export default function UsersComponent() {
                 <StyledTableCell>{data.email || "No Data"}</StyledTableCell>
                 <StyledTableCell>
                   {/* Display the formatted created time */}
-                  {new Date(data.createdTime).toLocaleDateString()}
+                  {new Date(data.createdAT).toLocaleDateString()}
                 </StyledTableCell>
               </StyledTableRow>
             ))}
