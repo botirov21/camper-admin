@@ -49,9 +49,12 @@ export default function UsersComponent() {
     fetchData();
   }, []);
   React.useEffect(() => {
-    // Calculate total users after data is fetched
     setTotalUsers(allData.length);
   }, [allData]);
+  const formatDate = (createdAt) => {
+    const data = new Date(createdAt);
+    return data.toISOString().split("T")[0];
+  };
   return (
     <div>
       <div
@@ -78,10 +81,7 @@ export default function UsersComponent() {
               <StyledTableRow key={data.name}>
                 <StyledTableCell>{data.name || "No Data"}</StyledTableCell>
                 <StyledTableCell>{data.email || "No Data"}</StyledTableCell>
-                <StyledTableCell>
-                  {/* Display the formatted created time */}
-                  {new Date(data.createdAT).toLocaleDateString()}
-                </StyledTableCell>
+                <StyledTableCell>{formatDate(data.createdAt || "No Data")}</StyledTableCell>
               </StyledTableRow>
             ))}
           </TableBody>

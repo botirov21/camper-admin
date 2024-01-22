@@ -14,6 +14,7 @@ import Stack from "@mui/joy/Stack";
 import Typography from "@mui/joy/Typography";
 import { Input } from "@mui/joy";
 import Snackbar from "@mui/joy/Snackbar";
+import Popup from 'reactjs-popup';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -49,12 +50,15 @@ export default function TuningComponent() {
   const [seats, setSeats] = React.useState("");
   const [location, setLocation] = React.useState("");;
   const [tunings, setTunings] = React.useState("");
+  const [search, setSearch] = React.useState("");
+  const [filteredData, setFilteredData] = React.useState("");
 
   React.useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetch(`${BASEURL}/tunings/allTunings`);
         const tunings = await response.json();
+        setFilteredData(tunings.data);
         setAllData(tunings.data);
       } catch (error) {
         console.log("Tuning data is wrong:", error);
@@ -89,12 +93,12 @@ export default function TuningComponent() {
     }
   };
 
-  const handleUpdateClick = async (id) => {
+  const handleUpdateClick = async (_id) => {
     try {
-      const response = await fetch(`${BASEURL}/tunings/${id}`,{
+      const response = await fetch(`${BASEURL}/tunings/${_id}`, {
         method: "PUT",
         headers: {
-          "Content-Type": "aplication/json"
+          "Content-Type": "application/json", // Fix the typo here
         },
         body: JSON.stringify({
           name: name,
@@ -103,15 +107,32 @@ export default function TuningComponent() {
           cost: cost,
           licence: licence,
           seats: seats,
-          location: location
-        })
-      })
+          location: location,
+        }),
+      });
       if (response.ok) {
-        console.log(response.ok);
+        // console.log(response.ok);
+        setOpenEdit(false);
       }
     } catch (error) {
       console.log("update is wrong", error);
     }
+  };
+
+  const handleSearch = (query) => {
+    setSearch(query);
+    const filtered = allData.filter(
+      (data) =>
+        data.name.toLowerCase().includes(query.toLowerCase()) ||
+        data.company.toLowerCase().includes(query.toLowerCase())
+    );
+    setFilteredData(filtered);
+  };
+
+
+  const formatDate = (createdAt) => {
+    const data = new Date(createdAt);
+    return data.toISOString().split("T")[0];
   };
 
   const handleDeleteClick = async (id) => {
@@ -127,6 +148,10 @@ export default function TuningComponent() {
       console.log("Error deleting motor:", error);
     }
   }
+  const formatUpdatedDate = (updatedAt) => {
+    const data = new Date(updatedAt);
+    return data.toISOString().split("T")[0];
+  };
   return (
     <div>
       <div
@@ -137,8 +162,7 @@ export default function TuningComponent() {
           padding: "20px",
         }}
       >
-        <TextField id="outlined-basic" label="Outlined" variant="outlined" />
-        {/* to Open */}
+        <TextField id="outlined-basic" label="Outlined" variant="outlined" onChange={(e) => handleSearch(e.target.value)} />
         <Button
           variant="contained"
           color="success"
@@ -148,7 +172,6 @@ export default function TuningComponent() {
         </Button>
         <Snackbar
           autoHideDuration={5000}
-          variant="solid"
           color="primary"
           size="lg"
           invertedColors
@@ -160,11 +183,11 @@ export default function TuningComponent() {
             maxWidth: 360,
           })}
         >
-          <div>
+          <div style={{ marginLeft: "15%" }} >
             <Typography level="title-lg" sx={{ textAlign: "center" }}>
-              Malumot Qo'shish
+              Add information
             </Typography>
-            <Typography sx={{ mt: 1, mb: 2 }}>
+            <Typography sx={{ mt: 1, mb: 2, display: 'flex', flexDirection: 'column', gap: '5px' }}>
               <Input
                 color="primary"
                 placeholder="Name"
@@ -204,7 +227,7 @@ export default function TuningComponent() {
             <Stack
               direction="row"
               spacing={1}
-              sx={{ display: "flex", justifyContent: "right" }}
+              sx={{ display: "flex", justifyContent: "center" }}
             >
               <Button variant="solid" color="success" onClick={handleClick}>
                 Add
@@ -213,83 +236,6 @@ export default function TuningComponent() {
                 variant="outlined"
                 color="error"
                 onClick={() => setOpen(false)}
-              >
-                Cancel
-              </Button>
-            </Stack>
-          </div>
-        </Snackbar>
-
-        {/* pop for update */}
-        <Snackbar
-          autoHideDuration={5000}
-          variant="solid"
-          color="primary"
-          size="lg"
-          invertedColors
-          open={openEdit}
-          onClose={() => setOpenEdit(false)}
-          anchorOrigin={{ vertical: "top", horizontal: "center" }}
-          sx={(theme) => ({
-            background: `linear-gradient(45deg, ${theme.palette.primary[600]} 30%, ${theme.palette.primary[500]} 90%})`,
-            maxWidth: 360,
-          })}
-        >
-          <div>
-            <Typography level="title-lg" sx={{ textAlign: "center" }}>
-              Malumot Qo'shish
-            </Typography>
-            <Typography sx={{ mt: 1, mb: 2 }}>
-              <Input
-                color="primary"
-                placeholder="Name"
-                onChange={(e) => setName(e.target.value)}
-              />
-              <Input
-                color="primary"
-                placeholder="Brand"
-                onChange={(e) => setBrand(e.target.value)}
-              />
-               <Input
-                color="primary"
-                placeholder="Brand"
-                onChange={(e) => setCompany(e.target.value)}
-              />
-              <Input
-                color="primary"
-                placeholder="Cost"
-                onChange={(e) => setCost(e.target.value)}
-              />
-              <Input
-                color="primary"
-                placeholder="Licence"
-                onChange={(e) => setLicence(e.target.value)}
-              />
-              <Input
-                color="primary"
-                placeholder="Seats"
-                onChange={(e) => setSeats(e.target.value)}
-              />
-              <Input
-                color="primary"
-                placeholder="Location"
-                onChange={(e) => setLocation(e.target.value)}
-              />
-            </Typography>
-            <Stack
-              direction="row"
-              spacing={1}
-              sx={{ display: "flex", justifyContent: "right" }}
-            >
-              {/* error */}
-              {/* <Button variant="solid" color="success" onClick={() => {handleUpdateClick(data._id);}}> */}
-              <Button variant="solid" color="success" onClick={() => {handleUpdateClick();}}>
-                Update
-              </Button>
-              <Button
-                variant="outlined"
-                color="error"
-                onClick={() => setOpenEdit(false)}
               >
                 Cancel
               </Button>
@@ -308,41 +254,126 @@ export default function TuningComponent() {
               <StyledTableCell>Cost</StyledTableCell>
               <StyledTableCell>Seats</StyledTableCell>
               <StyledTableCell>Location</StyledTableCell>
-              <StyledTableCell align="right">Tools</StyledTableCell>
+              <StyledTableCell>Created time</StyledTableCell>
+              <StyledTableCell>Updated time</StyledTableCell>
+              <StyledTableCell sx={{ paddingLeft: '7%' }}>Tools</StyledTableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {allData.map((data) => (
-              <StyledTableRow key={data.name}>
-                <StyledTableCell>{data.name || "No Data"}</StyledTableCell>
-                <StyledTableCell>{data.brand || "No Data"}</StyledTableCell>
-                <StyledTableCell>{data.company || "No Data"}</StyledTableCell>
-                <StyledTableCell>{data.licence || "No Data"}</StyledTableCell>
-                <StyledTableCell>{data.cost || "No Data"}</StyledTableCell>
-                <StyledTableCell>{data.seats || "No Data"}</StyledTableCell>
-                <StyledTableCell>{data.location || "No Data"}</StyledTableCell>
-                <StyledTableCell align="right">
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    startIcon={<DeleteIcon />}
-                    onClick={() => {
-                      handleDeleteClick(data._id);
-                    }}
-                  >
-                    Delete
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    startIcon={<EditIcon />}
-                    style={{ marginLeft: 10 }}
-                    onClick={() => setOpenEdit(true)}
+            {filteredData &&
+              filteredData.map((data) => (
+                <StyledTableRow key={data.name}>
+                  <StyledTableCell>{data.name || "No Data"}</StyledTableCell>
+                  <StyledTableCell>{data.brand || "No Data"}</StyledTableCell>
+                  <StyledTableCell>{data.company || "No Data"}</StyledTableCell>
+                  <StyledTableCell>{data.licence || "No Data"}</StyledTableCell>
+                  <StyledTableCell>{data.cost || "No Data"}</StyledTableCell>
+                  <StyledTableCell>{data.seats || "No Data"}</StyledTableCell>
+                  <StyledTableCell>{data.location || "No Data"}</StyledTableCell>
+                  <StyledTableCell>{formatDate(data.createdAt || "No Data")}</StyledTableCell>
+                  <StyledTableCell>{formatUpdatedDate(data.updatedAt || "No Data")}</StyledTableCell>
+                  <StyledTableCell sx={{ paddingLeft: '2%' }}>
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      startIcon={<DeleteIcon />}
+                      onClick={() => {
+                        handleDeleteClick(data._id);
+                      }}
                     >
-                    Edit
-                  </Button>
-                </StyledTableCell>
-              </StyledTableRow>
-            ))}
+                      Delete
+                    </Button>
+
+                    <Popup
+                      trigger={<Button
+                        variant="outlined"
+                        startIcon={<EditIcon />}
+                        style={{ marginLeft: 10 }}
+                        onClick={() => setOpenEdit(true)}
+                      >
+                        Edit
+                      </Button>}
+                      modal
+                      nested
+                    >
+                      {(close) => (
+                        <div className="modal">
+                          <div style={{ background: '#e6eef5', width: '50vh', padding: '10px', borderRadius: '10px', border: 'solid 2px #c7dbed' }}>
+                            <Typography
+                              level="title-lg"
+                              sx={{ textAlign: "center" }}
+                            >
+                              Edit
+                            </Typography>
+                            <Typography sx={{ mt: 1, mb: 2, display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                              <Input style={{ background: '#c7dbed', }}
+                                color="primary"
+                                placeholder="Name"
+                                onChange={(e) => setName(e.target.value)}
+                              />
+                              <Input style={{ background: '#c7dbed' }}
+                                color="primary"
+                                placeholder="Brand"
+                                onChange={(e) => setBrand(e.target.value)}
+                              />
+                              <Input style={{ background: '#c7dbed' }}
+                                color="primary"
+                                placeholder="Brand"
+                                onChange={(e) => setCompany(e.target.value)}
+                              />
+                              <Input style={{ background: '#c7dbed' }}
+                                color="primary"
+                                placeholder="Cost"
+                                onChange={(e) => setCost(e.target.value)}
+                              />
+                              <Input style={{ background: '#c7dbed' }}
+                                color="primary"
+                                placeholder="Licence"
+                                onChange={(e) => setLicence(e.target.value)}
+                              />
+                              <Input style={{ background: '#c7dbed' }}
+                                color="primary"
+                                placeholder="Seats"
+                                onChange={(e) => setSeats(e.target.value)}
+                              />
+                              <Input style={{ background: '#c7dbed' }}
+                                color="primary"
+                                placeholder="Location"
+                                onChange={(e) => setLocation(e.target.value)}
+                              />
+                            </Typography>
+                            <Stack
+                              direction="row"
+                              spacing={1}
+                              sx={{ display: "flex", justifyContent: "center" }}
+                            >
+                              <Button
+                                variant="outlined"
+                                color="success"
+                                onClick={() => {
+                                  handleUpdateClick(data._id);
+                                  close();
+                                }}
+                              >
+                                Update
+                              </Button>
+                              <Button
+                                variant="outlined"
+                                color="error"
+                                onClick={() => {
+                                  close();
+                                }}
+                              >
+                                Cancel
+                              </Button>
+                            </Stack>
+                          </div>
+                        </div>
+                      )}
+                    </Popup>
+                  </StyledTableCell>
+                </StyledTableRow>
+              ))}
           </TableBody>
         </Table>
       </TableContainer>
